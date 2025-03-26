@@ -10,8 +10,24 @@
                     </div>
                     <h2 class="text-2xl font-bold text-[#013565] mb-2">Félicitations !</h2>
                     <p class="text-gray-700 mb-6">Votre demande a été enregistrée avec succès. Un expert vous contactera très rapidement pour vous présenter les aides disponibles dans votre région.</p>
-                    <div class="bg-[#41b99f]/10 rounded-lg p-4 w-full max-w-lg">
+                    <div class="bg-[#41b99f]/10 rounded-lg p-4 w-full max-w-lg mb-6">
                         <p class="text-[#013565] font-medium">Vous pouvez bénéficier jusqu'à 90% d'aides pour l'installation de vos panneaux solaires. Notre expert vous contactera au {{ $phone }} pour vous présenter les détails.</p>
+                    </div>
+
+                    <!-- Widget Calendly pour prise de rendez-vous après formulaire soumis -->
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg w-full">
+                        <h4 class="font-medium text-[#013565] mb-2">Prenez rendez-vous dès maintenant avec un expert</h4>
+                        <p class="text-gray-600 mb-4">Sélectionnez une date et heure qui vous convient pour discuter de votre projet avec un de nos experts.</p>
+
+                        <!-- Intégration par iframe directe -->
+                        <iframe
+                            src="https://calendly.com/la-factory-lead?hide_gdpr_banner=1&name={{ urlencode($first_name . ' ' . $last_name) }}&email={{ urlencode($email) }}&a1={{ urlencode($phone) }}"
+                            width="100%"
+                            height="630"
+                            frameborder="0"
+                            title="Sélectionnez une date pour votre rendez-vous"
+                            allow="camera; microphone; fullscreen; payment"
+                        ></iframe>
                     </div>
 
                     <div class="mt-8">
@@ -181,7 +197,7 @@
                             </div>
                             @error('has_credits') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                         </div>
-                    @elseif($professional_situation === 'precaire' && in_array($marital_status, ['marie', 'concubinage']) && $spouse_professional_situation === 'stable')
+                    @elseif($professional_situation === 'precaire' && in_array($marital_status, ['marie', 'concubinage']))
                         <div class="mb-6">
                             <label class="block text-gray-700 font-medium mb-2">Situation professionnelle du conjoint</label>
                             <div class="grid grid-cols-1 gap-4 mt-3">
@@ -335,15 +351,6 @@
                                     <span class="text-sm text-gray-600">J'accepte de recevoir des informations sur les aides disponibles</span>
                                 </label>
                             </div>
-
-                            @if($isEligible)
-                                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                                    <h4 class="font-medium text-[#013565] mb-2">Prenez rendez-vous avec un expert</h4>
-                                    <p class="text-gray-600 mb-4">Sélectionnez une date et heure qui vous convient pour discuter de votre projet avec un de nos experts.</p>
-                                    <div class="calendly-inline-widget" data-url="https://calendly.com/votre-compte/consultation" style="min-width:320px;height:630px;"></div>
-                                    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-                                </div>
-                            @endif
                         </div>
                     @endif
                 @elseif($step == 10)

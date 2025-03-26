@@ -28,6 +28,25 @@
                     <!-- Intégration Calendly -->
                     <div class="calendly-inline-widget" data-url="{{ $calendlyUrl }}?hide_gdpr_banner=1&name={{ urlencode($lead->full_name) }}&email={{ urlencode($lead->email) }}&a1={{ urlencode($lead->phone) }}" style="min-width:320px;height:700px;"></div>
                     <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+                    <script type="text/javascript">
+                        window.addEventListener('DOMContentLoaded', function() {
+                            // Configuration de Calendly avec l'API key
+                            Calendly.initInlineWidget({
+                                url: '{{ $calendlyUrl }}?hide_gdpr_banner=1',
+                                parentElement: document.querySelector('.calendly-inline-widget'),
+                                prefill: {
+                                    name: "{{ $lead->first_name }} {{ $lead->last_name }}",
+                                    email: "{{ $lead->email }}",
+                                    customAnswers: {
+                                        a1: "{{ $lead->phone }}"
+                                    }
+                                }
+                            });
+
+                            // Ajout de l'authentification avec la clé API depuis les variables d'environnement
+                            Calendly.token = "{{ env('CALENDLY_API_KEY') }}";
+                        });
+                    </script>
                 </div>
             </div>
         </div>

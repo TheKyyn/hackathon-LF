@@ -263,10 +263,10 @@ class MultiStepForm extends Component
      */
     public function mount()
     {
-        // Récupérer les paramètres UTM s'ils existent
-        $this->utm_source = Request::input('utm_source');
-        $this->utm_medium = Request::input('utm_medium');
-        $this->utm_campaign = Request::input('utm_campaign');
+        // Récupérer les UTM s'ils existent
+        $this->utm_source = request()->get('utm_source', null);
+        $this->utm_medium = request()->get('utm_medium', null);
+        $this->utm_campaign = request()->get('utm_campaign', null);
 
         // Récupérer le paramètre cost de l'URL et définir la réponse correspondante
         if (request()->has('cost')) {
@@ -290,6 +290,10 @@ class MultiStepForm extends Component
             // Optionnellement, passer automatiquement à l'étape suivante
             // $this->nextStep();
         }
+
+        // Pour les besoins du hackathon, définir isEligible à true par défaut
+        $this->isEligible = true;
+        Log::info('Composant monté avec isEligible=true par défaut');
     }
 
     /**
@@ -313,18 +317,20 @@ class MultiStepForm extends Component
             $this->age = $age;
         }
 
-        // Vérifier les critères d'éligibilité:
-        // 1. Âge <= 70 ans
-        // 2. Propriétaire d'une maison
-        // 3. Au moins une personne en situation stable (CDI, retraité, indépendant)
+        // Pour les besoins du hackathon, toujours définir comme éligible
+        $this->isEligible = true;
 
+        // Code original commenté
+        /*
         $this->isEligible =
             (!empty($this->age) && $this->age <= 70) &&
             ($this->property_type === 'maison' && $this->confirm_owner) &&
             ($this->professional_situation === 'stable' ||
             (in_array($this->marital_status, ['marie', 'concubinage']) &&
             $this->spouse_professional_situation === 'stable'));
+        */
 
+        Log::info('Éligibilité calculée', ['isEligible' => $this->isEligible]);
         return $this->isEligible;
     }
 
