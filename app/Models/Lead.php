@@ -19,13 +19,26 @@ class Lead extends Model
         'last_name',
         'email',
         'phone',
+        'birth_date',
         'address',
         'postal_code',
         'city',
-        'energy_type',
-        'property_type',
+        'department',
+        'location_type',
+        'energy_bill',
         'is_owner',
-        'has_project',
+        'property_type',
+        'property_size',
+        'household_status',
+        'heating_type',
+        'roof_insulated',
+        'roof_material',
+        'installation_type',
+        'panel_size',
+        'pac_type',
+        'accept_aid',
+        'household_count',
+        'annual_income',
         'appointment_date',
         'appointment_id',
         'optin',
@@ -46,9 +59,11 @@ class Lead extends Model
      */
     protected $casts = [
         'is_owner' => 'boolean',
-        'has_project' => 'boolean',
+        'roof_insulated' => 'boolean',
+        'accept_aid' => 'boolean',
         'optin' => 'boolean',
         'appointment_date' => 'date',
+        'birth_date' => 'date',
     ];
 
     /**
@@ -68,9 +83,12 @@ class Lead extends Model
      */
     public function isQualified(): bool
     {
-        // Critères de qualification: propriétaire, maison individuelle, a un projet
+        // Critères de qualification:
+        // - propriétaire
+        // - type de logement maison
+        // - statut de foyer CDI ou retraité ou indépendant
         return $this->is_owner &&
-               $this->property_type === 'maison_individuelle' &&
-               $this->has_project;
+               $this->property_type === 'maison' &&
+               in_array($this->household_status, ['cdi', 'retraite', 'independant']);
     }
 }
