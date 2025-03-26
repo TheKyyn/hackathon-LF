@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CalendlyController;
 use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,3 +35,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/leads/{lead}/edit', [LeadController::class, 'edit'])->name('leads.edit');
     Route::put('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
 });
+
+// Routes pour les landing pages
+Route::get('/landing/{slug}', [LandingPageController::class, 'show'])->name('landing.show');
