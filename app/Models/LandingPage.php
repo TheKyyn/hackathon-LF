@@ -313,10 +313,93 @@ class LandingPage extends Model
     public function isVirtualField($field)
     {
         $virtual_fields = [
+            // Général
+            'primary_color', 'secondary_color', 'cta_color', 'blue_color',
+
+            // Hero
+            'publi_text', 'main_image', 'annonce_bg_color', 'annonce_text',
+            'author_photo', 'author_name', 'published_time',
+            'header_title', 'header_subtitle', 'cta_url', 'cta_text', 'banner_image',
+
+            // Eligibility
+            'eligibility_title', 'eligibility_intro', 'eligibility_bg_color',
+            'eligibility_point1', 'eligibility_point2', 'eligibility_point3', 'eligibility_point4',
+            'eligibility_btn_color', 'eligibility_btn_text', 'eligibility_btn_url',
+            'eligibility_section1_title', 'eligibility_section2_title',
+            'eligibility_info1', 'eligibility_info2', 'eligibility_info3',
+            'eligibility_cta_title', 'eligibility_cta_text',
+
+            // How it works
+            'how_title', 'step1_title', 'step1_text', 'step2_title', 'step2_text',
+            'step3_title', 'step3_text', 'how_button_text', 'how_button_url',
+
+            // Subsidies
+            'subsidies_title', 'subsidies_subtitle', 'subsidies_image1', 'subsidies_image2',
+            'subsidy1_title', 'subsidy1_text', 'subsidy1_amount',
+            'subsidy2_title', 'subsidy2_text', 'subsidy2_amount',
+            'subsidy3_title', 'subsidy3_text', 'subsidy3_amount',
+            'subsidies_cta_title', 'subsidies_cta_text', 'subsidies_cta_button', 'subsidies_cta_url',
+
+            // Costs
+            'costs_title', 'costs_subtitle',
+            'costs_option1', 'costs_option2', 'costs_option3', 'costs_option4',
+            'costs_option1_url', 'costs_option2_url', 'costs_option3_url', 'costs_option4_url',
+            'cost_option1_title', 'cost_option2_title', 'cost_option3_title',
+            'cost_option1_price', 'cost_option2_price', 'cost_option3_price',
+            'cost_option1_feature1', 'cost_option1_feature2', 'cost_option1_feature3',
+            'cost_option2_feature1', 'cost_option2_feature2', 'cost_option2_feature3',
+            'cost_option3_feature1', 'cost_option3_feature2', 'cost_option3_feature3',
+            'costs_aid_title', 'costs_aid_text', 'costs_aid_button', 'costs_aid_button_url',
+
+            // CTA
+            'cta_title', 'cta_text', 'cta_button', 'cta_button_url',
+
+            // Form
+            'form_title', 'form_text',
+            'guarantee1_title', 'guarantee1_text',
+            'guarantee2_title', 'guarantee2_text',
             'guarantee3_title', 'guarantee3_text',
-            'benefits_title', 'benefit1_text', 'benefit2_text', 'benefit3_text',
-            'footer_logo', 'footer_image', 'mentions_text', 'mentions_url',
-            'privacy_text', 'privacy_url'
+
+            // Opportunity
+            'opportunity_title', 'opportunity_intro',
+            'opportunity_point1_title', 'opportunity_point1_text',
+            'opportunity_point2_title', 'opportunity_point2_text',
+            'opportunity_point3_title', 'opportunity_point3_text',
+            'opportunity_point4_title', 'opportunity_point4_text',
+            'opportunity_cta_text', 'opportunity_cta_url',
+
+            // Innovation
+            'innovation_title', 'innovation_text1', 'innovation_text2',
+            'innovation_image', 'innovation_button_text', 'innovation_button_url',
+
+            // Providers
+            'providers_title',
+            'provider1', 'provider2', 'provider3', 'provider4',
+            'provider5', 'provider6', 'provider7', 'provider8',
+            'provider9', 'provider10', 'provider11', 'provider12',
+            'provider13', 'provider14', 'provider15', 'provider16',
+            'provider17', 'provider18', 'provider19', 'provider20',
+            'provider1_url', 'provider2_url', 'provider3_url', 'provider4_url',
+            'provider5_url', 'provider6_url', 'provider7_url', 'provider8_url',
+            'provider9_url', 'provider10_url', 'provider11_url', 'provider12_url',
+            'provider13_url', 'provider14_url', 'provider15_url', 'provider16_url',
+            'provider17_url', 'provider18_url', 'provider19_url', 'provider20_url',
+
+            // Benefits
+            'benefits_title', 'benefits_point1', 'benefits_point2', 'benefits_point3',
+            'benefit1_text', 'benefit2_text', 'benefit3_text',
+
+            // Steps
+            'steps_title', 'step1_title', 'step2_title', 'step3_title',
+            'step1_text', 'step2_text', 'step3_text',
+
+            // Map
+            'map_title', 'map_subtitle', 'map_footer_text',
+
+            // Footer
+            'footer_logo', 'footer_logo_text', 'footer_image',
+            'mentions_text', 'mentions_url', 'privacy_text', 'privacy_url',
+            'contact_text', 'contact_url', 'footer_text', 'footer_disclaimer'
         ];
 
         return in_array($field, $virtual_fields);
