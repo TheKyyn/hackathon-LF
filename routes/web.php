@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\CalendlyController;
+use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\LandingPageController;
 
@@ -29,12 +29,16 @@ Route::get('/calendly', [CalendlyController::class, 'show'])->name('calendly');
 Route::post('/calendly/webhook', [CalendlyController::class, 'webhook'])->name('calendly.webhook');
 Route::get('/confirmation', [CalendlyController::class, 'confirmation'])->name('confirmation');
 
-// Routes pour l'administration des leads (normalement protégées par auth middleware mais désactivé pour le hackathon)
-Route::prefix('admin')->name('admin.')->group(function () {
+// Routes pour l'administration des leads (avec auth middleware pour la sécurité)
+Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
+    // Dashboard administratif
+    Route::get('/dashboard', [LeadController::class, 'dashboard'])->name('dashboard');
+
+    // Gestion des leads
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
-    Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');
-    Route::get('/leads/{lead}/edit', [LeadController::class, 'edit'])->name('leads.edit');
-    Route::put('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
+    Route::get('/leads/{id}', [LeadController::class, 'show'])->name('leads.show');
+    Route::get('/leads/{id}/edit', [LeadController::class, 'edit'])->name('leads.edit');
+    Route::put('/leads/{id}', [LeadController::class, 'update'])->name('leads.update');
 });
 
 // Routes pour les landing pages

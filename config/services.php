@@ -41,4 +41,16 @@ return [
         'from' => env('TWILIO_FROM_NUMBER'),
     ],
 
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+    ],
+
+    'central_platform' => [
+        'url' => env('CENTRAL_PLATFORM_URL', 'http://localhost:8000'),
+        'api_token' => env('CENTRAL_PLATFORM_API_TOKEN'),
+    ],
+
 ];

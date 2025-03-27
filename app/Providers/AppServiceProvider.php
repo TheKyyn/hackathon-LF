@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Enregistrement des observers
+        // Enregistrer l'observer pour les leads
         Lead::observe(LeadObserver::class);
     }
 }

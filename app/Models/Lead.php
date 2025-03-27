@@ -130,4 +130,85 @@ class Lead extends Model
             'campaign' => $visit->utm_campaign ?? 'Non renseigné'
         ];
     }
+
+    /**
+     * Synchronise le lead actuel avec la plateforme centrale.
+     *
+     * @return bool
+     */
+    public function syncWithCentralPlatform(): bool
+    {
+        try {
+            $apiToken = config('services.central_platform.api_token');
+            $apiUrl = config('services.central_platform.url') . '/api/v1/leads/sync';
+
+            if (!$apiToken || !$apiUrl) {
+                \Log::error('Configuration de la plateforme centrale manquante');
+                return false;
+            }
+
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post($apiUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiToken,
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'original_id' => $this->id,
+                    'first_name' => $this->first_name,
+                    'last_name' => $this->last_name,
+                    'email' => $this->email,
+                    'phone' => $this->phone,
+                    'address' => $this->address,
+                    'postal_code' => $this->postal_code,
+                    'city' => $this->city,
+                    'energy_type' => $this->energy_type,
+                    'property_type' => $this->property_type,
+                    'is_owner' => $this->is_owner,
+                    'has_project' => $this->has_project,
+                    'appointment_date' => $this->appointment_date ? $this->appointment_date->format('Y-m-d') : null,
+                    'appointment_id' => $this->appointment_id,
+                    'optin' => $this->optin,
+                    'ip_address' => $this->ip_address,
+                    'utm_source' => $this->utm_source,
+                    'utm_medium' => $this->utm_medium,
+                    'utm_campaign' => $this->utm_campaign,
+                    'status' => $this->status,
+                    'sale_status' => $this->sale_status,
+                    'comment' => $this->comment,
+                    'airtable_id' => $this->airtable_id,
+                ]
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $body = json_decode($response->getBody(), true);
+
+            if ($statusCode === 200 || $statusCode === 201) {
+                \Log::info('Lead #' . $this->id . ' synchronisé avec la plateforme centrale');
+                return true;
+            } else {
+                \Log::error('Erreur lors de la synchronisation du lead #' . $this->id . ' avec la plateforme centrale', [
+                    'status_code' => $statusCode,
+                    'response' => $body
+                ]);
+                return false;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Exception lors de la synchronisation du lead #' . $this->id . ' avec la plateforme centrale', [
+                'exception' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Alias pour syncWithCentralPlatform pour compatibilité avec le job.
+     *
+     * @return bool
+     */
+    public function syncWithPlatform(): bool
+    {
+        return $this->syncWithCentralPlatform();
+    }
 }

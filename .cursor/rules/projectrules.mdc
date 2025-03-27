@@ -1,0 +1,88 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Contexte général
+
+- Le projet est un site web pour collecter des leads sur les panneaux photovoltaïques et pompes à chaleur.
+
+- Stack utilisée : TALL (Tailwind CSS, Alpine.js, Laravel, Livewire).
+
+- Objectif : Livrer un MVP fonctionnel et scalable d’ici demain, 27 mars 2025.
+
+- Utiliser Cursor.ai pour accélérer le développement (autocomplétion, génération de code, debug).
+
+Structure du code
+
+- Organiser le projet en composants Livewire pour chaque fonctionnalité (ex. : FormulaireMultiEtapes, CalendlyIntegration).
+
+- Garder les fichiers Blade simples, avec un maximum de logique dans les composants Livewire.
+
+- Utiliser des classes Tailwind cohérentes avec le wireframe Figma fourni.
+
+- Structurer les routes Laravel dans web.php avec des noms clairs (ex. /leads, /admin).
+
+- Formulaire multi-étapes (2.1)
+
+- Créer un composant Livewire MultiStepForm avec une étape par question (cf. reco UX).
+
+- Utiliser une grille Tailwind (ex. grid grid-cols-2 gap-4) pour les réponses à 6 choix ou moins.
+
+- Valider en temps réel avec Alpine.js (ex. @input.debounce).
+
+- Intégrer kyranb/Footprints pour le tracking (ajouter dans le composer.json et configurer).
+
+- Vérifier les faux numéros (regex simple : ^0[6-7][0-9]{8}$ pour les mobiles FR) et les doublons via une query Laravel.
+
+- Stocker l’optin dans une colonne dédiée (ex. optin: boolean).
+
+Intégrations externes
+
+- Calendly (2.2) : Utiliser une iframe ou l’API avec la clé fournie pour afficher le calendrier en fin de formulaire.
+
+- Twilio (2.3) : Configurer un job Laravel pour envoyer des SMS via l’API Twilio (SID et Token fournis).
+
+- Email (2.4) : Utiliser Laravel Mail avec Mailtrap pour des emails personnalisés (ex. {{ $lead->name }}).
+
+- Airtable (2.5) : Ajouter le package airtable/sdk et envoyer les leads via l’API avec le token et l’ID de base.
+
+- Administration avec Nova (2.6)
+
+- Installer Laravel Nova et créer une ressource Lead avec des champs : email, phone, optin, status, sale_status, comment.
+
+- Ajouter des metrics (ex. Value pour le nombre de leads) et afficher les données de Footprints.
+
+- Utiliser des filtres simples (ex. SelectFilter pour le statut).
+
+Duplication de landing (2.7)
+
+- Créer un modèle LandingPage avec un champ content éditable via Nova.
+
+- Utiliser un composant Livewire pour rendre dynamiquement le contenu.
+
+Plateforme centrale (2.8)
+
+- Créer un projet Laravel séparé avec une API REST pour centraliser les leads.
+
+- Utiliser Laravel Sanctum pour sécuriser l’accès.
+
+- Implémenter un système de live update avec Laravel Echo et WebSockets (optionnel si le temps le permet).
+
+- Ajouter des filtres avec Eloquent (ex. Lead::where('type', $request->type)).
+
+Styling
+
+- Suivre le wireframe Figma pour les couleurs, espacements et typographie.
+
+- Utiliser Tailwind pour une UI responsive (ex. sm:, md: breakpoints).
+
+- Garder une UX fluide : boutons larges, contrastés, et transitions légères avec Alpine.js.
+
+Optimisation Cursor.ai
+
+- Fournir à Cursor.ai des extraits du cahier des charges pour chaque tâche.
+
+- Demander des snippets spécifiques (ex. "Génère un composant Livewire pour un formulaire multi-étapes").
+
+- Tester chaque suggestion immédiatement et ajuster si besoin.
