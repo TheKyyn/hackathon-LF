@@ -31,4 +31,18 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('livewire:init', () => {
+            console.log('Livewire initialisé');
+
+            // Monitorer les erreurs Livewire
+            document.addEventListener('livewire:error', (event) => {
+                console.error('Erreur Livewire:', event.detail);
+                alert('Erreur détectée: ' + JSON.stringify(event.detail));
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>
