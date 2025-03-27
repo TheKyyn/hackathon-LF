@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Lead extends Model
 {
@@ -90,5 +91,43 @@ class Lead extends Model
         return $this->is_owner &&
                $this->property_type === 'maison' &&
                in_array($this->household_status, ['cdi', 'retraite', 'independant']);
+    }
+
+    /**
+     * Relation avec les visites.
+     */
+    public function visits()
+    {
+        return $this->hasMany(Visit::class);
+    }
+
+    /**
+     * Récupère la première visite associée à ce lead.
+     */
+    public function firstVisit()
+    {
+        return $this->visits()->orderBy('created_at')->first();
+    }
+
+    /**
+     * Récupère les informations UTM de la première visite.
+     */
+    public function getUtmDataAttribute()
+    {
+        $visit = $this->firstVisit();
+
+        if (!$visit) {
+            return [
+                'source' => $this->utm_source ?? 'Non renseigné',
+                'medium' => $this->utm_medium ?? 'Non renseigné',
+                'campaign' => $this->utm_campaign ?? 'Non renseigné'
+            ];
+        }
+
+        return [
+            'source' => $visit->utm_source ?? 'Non renseigné',
+            'medium' => $visit->utm_medium ?? 'Non renseigné',
+            'campaign' => $visit->utm_campaign ?? 'Non renseigné'
+        ];
     }
 }

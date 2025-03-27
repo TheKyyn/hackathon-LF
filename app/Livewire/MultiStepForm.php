@@ -563,7 +563,7 @@ class MultiStepForm extends Component
     }
 
     /**
-     * Soumettre le formulaire
+     * Process form submission
      */
     public function submit()
     {
@@ -586,8 +586,8 @@ class MultiStepForm extends Component
                 }
             }
 
-            // Simplifier la validation pour tester
-            $validatedData = [
+            // Création du lead avec les données du formulaire
+            $data = [
                 'first_name' => $this->first_name ?: 'Non renseigné',
                 'last_name' => $this->last_name ?: 'Non renseigné',
                 'email' => $this->email ?: 'test'.time().'@example.com',
@@ -605,43 +605,33 @@ class MultiStepForm extends Component
                 'status' => 'new', // Ajout du statut par défaut
             ];
 
-            // Ajouter l'adresse IP
-            $validatedData['ip_address'] = Request::ip();
+            // Ajouter l'adresse IP et les UTM
+            $data['ip_address'] = Request::ip();
+            $data['utm_source'] = $this->utm_source;
+            $data['utm_medium'] = $this->utm_medium;
+            $data['utm_campaign'] = $this->utm_campaign;
 
-            // Ajouter les paramètres UTM
-            $validatedData['utm_source'] = $this->utm_source;
-            $validatedData['utm_medium'] = $this->utm_medium;
-            $validatedData['utm_campaign'] = $this->utm_campaign;
+            Log::info('Tentative de création de lead', ['data' => $data]);
 
-            // Loguer les données pour debug
-            Log::info('Tentative de création de lead', ['data' => $validatedData]);
+            $lead = Lead::create($data);
 
-            // Créer le lead avec le nouvel objet
-            $lead = new Lead();
-            $lead->first_name = $validatedData['first_name'];
-            $lead->last_name = $validatedData['last_name'];
-            $lead->email = $validatedData['email'];
-            $lead->phone = $validatedData['phone'];
-            $lead->energy_bill = $validatedData['energy_bill'];
-            $lead->energy_type = $validatedData['energy_type'];
-            $lead->is_owner = $validatedData['is_owner'];
-            $lead->property_type = $validatedData['property_type'];
-            $lead->property_size = $validatedData['property_size'];
-            $lead->roof_material = $validatedData['roof_material'];
-            $lead->roof_orientation = $validatedData['roof_orientation'];
-            $lead->installation_type = $validatedData['installation_type'];
-            $lead->postal_code = $validatedData['postal_code'];
-            $lead->optin = $validatedData['optin'];
-            $lead->status = $validatedData['status'];
-            $lead->ip_address = $validatedData['ip_address'];
-            $lead->utm_source = $validatedData['utm_source'];
-            $lead->utm_medium = $validatedData['utm_medium'];
-            $lead->utm_campaign = $validatedData['utm_campaign'];
-
-            $lead->save();
-
-            // Loguer le succès
             Log::info('Lead créé avec succès', ['id' => $lead->id]);
+
+            // Associer la visite au lead si un service de tracking est disponible
+            try {
+                if (app()->has(\App\Services\TrackingService::class)) {
+                    $trackingService = app(\App\Services\TrackingService::class);
+                    $trackingService->assignVisitToLead($lead);
+                    Log::info('Visite associée au lead', ['lead_id' => $lead->id]);
+                } else {
+                    Log::warning('Service de tracking non disponible');
+                }
+            } catch (\Exception $e) {
+                Log::error('Erreur lors de l\'association de la visite', [
+                    'lead_id' => $lead->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             // Afficher un message de succès sur la page courante au lieu de rediriger
             session()->flash('success', true);

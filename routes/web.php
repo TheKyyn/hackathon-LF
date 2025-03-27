@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CalendlyController;
-use App\Http\Controllers\Admin\LeadController;
-use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\CalendlyController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\LandingPageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Page d'accueil (landing page)
+// Routes principales
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Formulaire multi-étapes
@@ -38,3 +39,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 // Routes pour les landing pages
 Route::get('/landing/{slug}', [LandingPageController::class, 'show'])->name('landing.show');
+Route::get('/landing', [LandingPageController::class, 'default'])->name('landing.default');
+
+// Routes de test
+Route::get('/test-calendly', function () {
+    return view('calendly-test');
+})->name('test.calendly');
+
+Route::get('/test-email-form', function () {
+    return view('test-email');
+})->name('test.email.form');
+
+Route::get('/test-calendly-webhook', [TestController::class, 'testCalendlyWebhook'])->name('test.webhook');
+Route::get('/test-email', [TestController::class, 'testEmailSending'])->name('test.email');
+Route::get('/test-email-config', [TestController::class, 'showEmailConfig'])->name('test.email.config');
+Route::get('/test-native-mail', [TestController::class, 'testNativeMail'])->name('test.native.mail');

@@ -34,19 +34,21 @@ class Lead extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'first_name', 'last_name', 'email', 'phone', 'postal_code',
+        'id', 'email', 'phone', 'first_name', 'last_name',
     ];
 
     /**
      * Get the fields displayed by the resource.
      *
-     * @return array<int, \Laravel\Nova\Fields\Field>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function fields(NovaRequest $request): array
+    public function fields(NovaRequest $request)
     {
         return [
             ID::make()->sortable(),
 
+            // Informations personnelles
             Text::make('Prénom', 'first_name')
                 ->sortable(),
 
@@ -55,128 +57,120 @@ class Lead extends Resource
 
             Text::make('Email', 'email')
                 ->sortable()
-                ->rules('email', 'max:254'),
+                ->rules('required', 'email'),
 
             Text::make('Téléphone', 'phone')
-                ->sortable(),
+                ->sortable()
+                ->rules('required'),
 
             Text::make('Code Postal', 'postal_code')
-                ->sortable()
                 ->hideFromIndex(),
 
-            Select::make('Type de Chauffage', 'energy_type')
+            // Informations sur le projet
+            Select::make('Facture d\'énergie', 'energy_bill')
                 ->options([
-                    'EDF' => 'EDF',
-                    'Gaz' => 'Gaz',
-                    'Fioul' => 'Fioul',
-                    'Autre' => 'Autre',
+                    '0-100' => '0-100€',
+                    '100-200' => '100-200€',
+                    '200-300' => '200-300€',
+                    '300+' => '300€ et plus',
                 ])
                 ->hideFromIndex(),
 
-            Text::make('Facture Énergétique', 'energy_bill')
+            Select::make('Type de propriété', 'property_type')
+                ->options([
+                    'house' => 'Maison',
+                    'apartment' => 'Appartement',
+                ])
                 ->hideFromIndex(),
 
             Boolean::make('Propriétaire', 'is_owner')
                 ->hideFromIndex(),
 
-            Badge::make('Statut d\'Appel', 'call_status')
-                ->map([
-                    'à appeler' => 'warning',
-                    'appelé' => 'success',
-                    'rappeler' => 'info',
-                ])
-                ->labels([
-                    'à appeler' => 'À appeler',
-                    'appelé' => 'Appelé',
-                    'rappeler' => 'Rappeler',
+            // Statuts et suivi
+            Select::make('Statut', 'status')
+                ->options([
+                    'new' => 'Nouveau',
+                    'contacted' => 'Contacté',
+                    'qualified' => 'Qualifié',
+                    'not_interested' => 'Pas intéressé',
                 ])
                 ->sortable(),
 
-            Select::make('Statut d\'Appel', 'call_status')
+            Select::make('Statut de vente', 'sale_status')
                 ->options([
-                    'à appeler' => 'À appeler',
-                    'appelé' => 'Appelé',
-                    'rappeler' => 'Rappeler',
-                ])
-                ->onlyOnForms(),
-
-            Badge::make('Statut de Vente', 'sale_status')
-                ->map([
-                    'à vendre' => 'warning',
-                    'vendu' => 'success',
-                    'annulé' => 'danger',
-                ])
-                ->labels([
-                    'à vendre' => 'À vendre',
-                    'vendu' => 'Vendu',
-                    'annulé' => 'Annulé',
+                    'pending' => 'En attente',
+                    'to_sell' => 'À vendre',
+                    'sold' => 'Vendu',
+                    'cancelled' => 'Annulé',
                 ])
                 ->sortable(),
-
-            Select::make('Statut de Vente', 'sale_status')
-                ->options([
-                    'à vendre' => 'À vendre',
-                    'vendu' => 'Vendu',
-                    'annulé' => 'Annulé',
-                ])
-                ->onlyOnForms(),
 
             Textarea::make('Commentaire', 'comment')
-                ->alwaysShow()
-                ->rows(3),
+                ->hideFromIndex()
+                ->alwaysShow(),
 
+            // Marketing et tracking
             Boolean::make('Opt-in Marketing', 'optin')
+                ->sortable(),
+
+            Text::make('IP', 'ip_address')
                 ->hideFromIndex(),
 
-            Text::make('ID Airtable', 'airtable_id')
-                ->onlyOnDetail(),
+            Text::make('Source UTM', 'utm_source')
+                ->hideFromIndex(),
 
+            Text::make('Medium UTM', 'utm_medium')
+                ->hideFromIndex(),
+
+            Text::make('Campagne UTM', 'utm_campaign')
+                ->hideFromIndex(),
+
+            // Timestamps
             DateTime::make('Créé le', 'created_at')
                 ->sortable()
-                ->format('DD/MM/YYYY HH:mm')
-                ->hideFromIndex(),
+                ->hideWhenCreating()
+                ->hideWhenUpdating(),
 
-            DateTime::make('Modifié le', 'updated_at')
+            DateTime::make('Mis à jour le', 'updated_at')
                 ->sortable()
-                ->format('DD/MM/YYYY HH:mm')
-                ->hideFromIndex(),
+                ->hideWhenCreating()
+                ->hideWhenUpdating(),
         ];
     }
 
     /**
      * Get the cards available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Card>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function cards(NovaRequest $request): array
+    public function cards(NovaRequest $request)
     {
         return [
-            new Metrics\TotalLeads(),
-            new Metrics\LeadsPerDay(),
-            new Metrics\LeadsByStatus(),
-            new Metrics\LeadsByCallStatus(),
+            new Metrics\VisitsBySourceMetric(),
+            new Metrics\VisitsTrendMetric(),
+            new Metrics\VisitToLeadConversionMetric(),
         ];
     }
 
     /**
      * Get the filters available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Filters\Filter>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function filters(NovaRequest $request): array
+    public function filters(NovaRequest $request)
     {
-        return [
-            new Filters\LeadCallStatusFilter,
-            new Filters\LeadSaleStatusFilter,
-        ];
+        return [];
     }
 
     /**
      * Get the lenses available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Lenses\Lens>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function lenses(NovaRequest $request): array
+    public function lenses(NovaRequest $request)
     {
         return [];
     }
@@ -184,9 +178,10 @@ class Lead extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Actions\Action>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function actions(NovaRequest $request): array
+    public function actions(NovaRequest $request)
     {
         return [];
     }

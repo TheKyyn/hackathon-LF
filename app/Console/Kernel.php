@@ -31,6 +31,18 @@ class Kernel extends ConsoleKernel
                  ->everyFiveMinutes()
                  ->withoutOverlapping()
                  ->appendOutputTo(storage_path('logs/appointment-confirmations.log'));
+
+        // Vérifier les nouveaux rendez-vous toutes les 5 minutes
+        $schedule->command('calendly:check-appointments')
+                 ->everyFiveMinutes()
+                 ->withoutOverlapping()
+                 ->appendOutputTo(storage_path('logs/calendly-appointments.log'));
+
+        // Envoyer les rappels de rendez-vous toutes les heures
+        $schedule->command('calendly:send-reminders')
+                 ->hourly()
+                 ->withoutOverlapping()
+                 ->appendOutputTo(storage_path('logs/calendly-reminders.log'));
     }
 
     /**

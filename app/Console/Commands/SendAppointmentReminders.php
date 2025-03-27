@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Models\Lead;
-use App\Services\TwilioService;
+use App\Services\CalendlyService;
 use App\Services\EmailService;
+use App\Services\TwilioService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class SendAppointmentReminders extends Command
 {
@@ -16,29 +16,31 @@ class SendAppointmentReminders extends Command
      *
      * @var string
      */
-    protected $signature = 'app:send-appointment-reminders {hours=24 : Heures avant le rendez-vous pour envoyer le rappel}';
+    protected $signature = 'calendly:send-reminders';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Envoie des rappels de rendez-vous par email et SMS aux leads';
+    protected $description = 'Envoie des rappels pour les rendez-vous à venir dans 24h';
 
     /**
      * Services d'envoi de SMS et d'emails
      */
-    protected $twilioService;
+    protected $calendlyService;
     protected $emailService;
+    protected $twilioService;
 
     /**
      * Create a new command instance.
      */
-    public function __construct(TwilioService $twilioService, EmailService $emailService)
+    public function __construct(CalendlyService $calendlyService, EmailService $emailService, TwilioService $twilioService)
     {
         parent::__construct();
-        $this->twilioService = $twilioService;
+        $this->calendlyService = $calendlyService;
         $this->emailService = $emailService;
+        $this->twilioService = $twilioService;
     }
 
     /**
@@ -46,69 +48,86 @@ class SendAppointmentReminders extends Command
      */
     public function handle()
     {
-        $hoursBeforeAppointment = $this->argument('hours');
-        $this->info("Recherche des rendez-vous prévus dans {$hoursBeforeAppointment} heures...");
+        $this->info('Vérification des rendez-vous à venir pour envoyer des rappels...');
 
-        try {
-            // Calculer la date cible (rendez-vous dans X heures)
-            $targetDate = Carbon::now()->addHours($hoursBeforeAppointment);
+        // Récupérer les rendez-vous à venir dans les prochaines 24h
+        $appointments = $this->calendlyService->getUpcomingAppointments();
 
-            // Fenêtre de temps d'une heure pour trouver les rendez-vous
-            $startTime = $targetDate->copy()->subMinutes(30);
-            $endTime = $targetDate->copy()->addMinutes(30);
+        if (empty($appointments)) {
+            $this->info('Aucun rendez-vous à venir dans les prochaines 24h.');
+            return;
+        }
 
-            // Rechercher les leads avec un rendez-vous dans cette fenêtre
-            $leads = Lead::whereNotNull('appointment_date')
-                ->where('appointment_date', '>=', $startTime->toDateTimeString())
-                ->where('appointment_date', '<=', $endTime->toDateTimeString())
-                ->get();
+        $this->info(count($appointments) . ' rendez-vous à venir trouvés.');
 
-            $count = $leads->count();
-            $this->info("Trouvé {$count} leads avec un rendez-vous à venir dans ~{$hoursBeforeAppointment} heures.");
+        $processedCount = 0;
+        $errorCount = 0;
 
-            if ($count === 0) {
-                return 0;
+        foreach ($appointments as $appointment) {
+            $event = $appointment['event'];
+            $invitee = $appointment['invitee'];
+
+            $email = $invitee['email'] ?? null;
+
+            if (!$email) {
+                $this->warn('Email manquant pour un invité.');
+                continue;
             }
 
-            $bar = $this->output->createProgressBar($count);
-            $bar->start();
+            // Trouver le lead correspondant à cet email
+            $lead = Lead::where('email', $email)->first();
 
-            $success = 0;
-            $errors = 0;
+            if (!$lead) {
+                $this->warn("Aucun lead trouvé pour l'email: $email");
+                continue;
+            }
 
-            foreach ($leads as $lead) {
-                $this->line("\nTraitement du lead #{$lead->id} - {$lead->email}");
+            // Vérifier si le rendez-vous est bien enregistré
+            if (!$lead->appointment_date || !$lead->appointment_id) {
+                $this->warn("Rendez-vous non enregistré pour le lead: {$lead->email}");
 
-                // Envoyer le rappel par email
-                $emailSent = $this->emailService->sendAppointmentReminder($lead, $hoursBeforeAppointment);
+                // Mettre à jour les informations du rendez-vous
+                $lead->appointment_date = $event['start_time_pretty'] ?? $event['start_time'];
+                $lead->appointment_id = $invitee['uri'];
+                $lead->status = 'appointment_scheduled';
+                $lead->save();
+            }
 
-                // Envoyer le rappel par SMS
-                $smsSent = $this->twilioService->sendAppointmentReminder($lead, $hoursBeforeAppointment);
-
-                if ($emailSent && $smsSent) {
-                    $success++;
-                    $this->info("  ✓ Rappels envoyés avec succès");
-                } else {
-                    $errors++;
-                    $this->error("  ✗ Erreur lors de l'envoi des rappels");
+            try {
+                // Vérifier si un rappel a déjà été envoyé
+                if ($lead->reminder_sent) {
+                    $this->info("Rappel déjà envoyé pour le lead: {$lead->email}");
+                    continue;
                 }
 
-                $bar->advance();
+                // Envoyer un email de rappel
+                $emailSent = $this->emailService->sendAppointmentReminder($lead);
+
+                // Envoyer un SMS de rappel
+                $smsSent = $this->twilioService->sendAppointmentReminder($lead);
+
+                if ($emailSent || $smsSent) {
+                    // Marquer le rappel comme envoyé
+                    $lead->reminder_sent = true;
+                    $lead->save();
+
+                    $this->info("Rappel envoyé pour le lead: {$lead->email}");
+                    $processedCount++;
+                } else {
+                    $this->error("Erreur lors de l'envoi du rappel pour le lead: {$lead->email}");
+                    $errorCount++;
+                }
+            } catch (\Exception $e) {
+                $this->error("Exception lors de l'envoi du rappel: " . $e->getMessage());
+                Log::error("Exception lors de l'envoi du rappel pour rendez-vous: " . $e->getMessage(), [
+                    'lead_id' => $lead->id,
+                    'email' => $email,
+                    'trace' => $e->getTraceAsString()
+                ]);
+                $errorCount++;
             }
-
-            $bar->finish();
-
-            $this->newLine(2);
-            $this->info("Traitement terminé : {$success} rappels envoyés, {$errors} erreurs.");
-
-            return 0;
-        } catch (\Exception $e) {
-            $this->error("Une erreur est survenue : " . $e->getMessage());
-            Log::error('Erreur lors de l\'envoi des rappels de rendez-vous: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return 1;
         }
+
+        $this->info("Traitement terminé: $processedCount rappels envoyés, $errorCount erreurs.");
     }
 }

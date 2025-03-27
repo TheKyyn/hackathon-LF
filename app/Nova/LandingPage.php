@@ -3,13 +3,14 @@
 namespace App\Nova;
 
 use App\Nova\Actions\DuplicateLandingPage;
-use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Color;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Slug;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Trix;
+use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class LandingPage extends Resource
@@ -60,48 +61,109 @@ class LandingPage extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @return array<int, \Laravel\Nova\Fields\Field>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function fields(NovaRequest $request): array
+    public function fields(NovaRequest $request)
     {
         return [
             ID::make()->sortable(),
 
+            // Informations générales
             Text::make('Titre', 'title')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
+            Text::make('Sous-titre', 'subtitle')
+                ->hideFromIndex()
+                ->nullable(),
+
             Slug::make('Slug', 'slug')
                 ->from('title')
                 ->rules('required', 'max:255')
-                ->hideFromIndex(),
-
-            Trix::make('Contenu', 'content')
-                ->rules('required')
-                ->withFiles('public')
-                ->hideFromIndex(),
+                ->creationRules('unique:landing_pages,slug')
+                ->updateRules('unique:landing_pages,slug,{{resourceId}}'),
 
             Boolean::make('Actif', 'is_active')
                 ->sortable(),
 
-            Textarea::make('Meta Description', 'meta_description')
-                ->rows(2)
-                ->rules('nullable', 'max:255')
+            // Contenu principal
+            Trix::make('Contenu', 'content')
                 ->hideFromIndex(),
 
+            Text::make('Titre des avantages', 'advantages_title')
+                ->hideFromIndex()
+                ->nullable(),
+
+            Trix::make('Liste des avantages', 'advantages_list')
+                ->hideFromIndex()
+                ->nullable(),
+
+            // Call-to-Action
+            Text::make('Texte du CTA', 'cta_text')
+                ->hideFromIndex()
+                ->default('Commencer maintenant'),
+
+            Color::make('Couleur du CTA', 'cta_color')
+                ->hideFromIndex()
+                ->default('#4CAF50'),
+
+            // Apparence
+            Color::make('Couleur principale', 'primary_color')
+                ->hideFromIndex()
+                ->default('#4CAF50'),
+
+            Color::make('Couleur secondaire', 'secondary_color')
+                ->hideFromIndex()
+                ->default('#2196F3'),
+
+            Image::make('Image d\'arrière-plan', 'background_image')
+                ->hideFromIndex()
+                ->disk('public')
+                ->nullable()
+                ->path('landing-pages'),
+
+            Image::make('Logo', 'logo')
+                ->hideFromIndex()
+                ->disk('public')
+                ->nullable()
+                ->path('landing-pages'),
+
+            // SEO
+            Textarea::make('Meta Description', 'meta_description')
+                ->hideFromIndex()
+                ->nullable()
+                ->rules('max:255'),
+
             Textarea::make('Meta Keywords', 'meta_keywords')
-                ->rows(2)
-                ->rules('nullable', 'max:255')
-                ->hideFromIndex(),
+                ->hideFromIndex()
+                ->nullable()
+                ->rules('max:255'),
+
+            Text::make('OG Title', 'og_title')
+                ->hideFromIndex()
+                ->nullable()
+                ->rules('max:255'),
+
+            Textarea::make('OG Description', 'og_description')
+                ->hideFromIndex()
+                ->nullable(),
+
+            Image::make('OG Image', 'og_image')
+                ->hideFromIndex()
+                ->disk('public')
+                ->nullable()
+                ->path('landing-pages'),
         ];
     }
 
     /**
-     * Get the cards available for the resource.
+     * Get the cards available for the request.
      *
-     * @return array<int, \Laravel\Nova\Card>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function cards(NovaRequest $request): array
+    public function cards(NovaRequest $request)
     {
         return [];
     }
@@ -109,9 +171,10 @@ class LandingPage extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Filters\Filter>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function filters(NovaRequest $request): array
+    public function filters(NovaRequest $request)
     {
         return [];
     }
@@ -119,9 +182,10 @@ class LandingPage extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Lenses\Lens>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function lenses(NovaRequest $request): array
+    public function lenses(NovaRequest $request)
     {
         return [];
     }
@@ -129,12 +193,13 @@ class LandingPage extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @return array<int, \Laravel\Nova\Actions\Action>
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
      */
-    public function actions(NovaRequest $request): array
+    public function actions(NovaRequest $request)
     {
         return [
-            new DuplicateLandingPage(),
+            new DuplicateLandingPage,
         ];
     }
 }

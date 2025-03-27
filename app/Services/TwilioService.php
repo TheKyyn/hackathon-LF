@@ -16,15 +16,44 @@ class TwilioService
      */
     public function __construct()
     {
-        $accountSid = env('TWILIO_ACCOUNT_SID');
-        $authToken = env('TWILIO_AUTH_TOKEN');
-        $this->fromNumber = env('TWILIO_FROM_NUMBER');
+        $this->client = new Client(
+            config('services.twilio.sid'),
+            config('services.twilio.token')
+        );
+        $this->fromNumber = config('services.twilio.from');
+    }
 
+    /**
+     * Envoie un SMS via Twilio
+     *
+     * @param string $to Numéro de téléphone du destinataire
+     * @param string $message Contenu du message
+     * @return bool
+     */
+    public function sendSMS(string $to, string $message): bool
+    {
         try {
-            $this->client = new Client($accountSid, $authToken);
+            $message = $this->client->messages->create(
+                $to,
+                [
+                    'from' => $this->fromNumber,
+                    'body' => $message
+                ]
+            );
+
+            Log::info('SMS envoyé avec succès', [
+                'to' => $to,
+                'message_sid' => $message->sid
+            ]);
+
+            return true;
         } catch (\Exception $e) {
-            Log::error('Erreur d\'initialisation Twilio: ' . $e->getMessage());
-            $this->client = null;
+            Log::error('Erreur lors de l\'envoi du SMS', [
+                'error' => $e->getMessage(),
+                'to' => $to
+            ]);
+
+            return false;
         }
     }
 
