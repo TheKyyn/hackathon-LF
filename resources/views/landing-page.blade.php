@@ -72,6 +72,9 @@
             background-color: #f3f4f6;
         }
         @endif
+
+        /* CSS personnalisé */
+        {!! $landing->custom_css !!}
     </style>
 </head>
 <body class="bg-gray-100">
@@ -92,10 +95,11 @@
         <!-- Banner Section -->
         <section class="banner py-16">
             <div class="container mx-auto px-4 text-center">
-                <h1 class="text-4xl font-bold mb-4">{{ $landing->title }}</h1>
-                @if($landing->subtitle)
-                <p class="text-xl text-gray-700 mb-8">{{ $landing->subtitle }}</p>
-                @endif
+                <h1 class="text-4xl font-bold mb-4">{{ $landing->header_title ?? $landing->title }}</h1>
+                <p class="text-xl text-gray-700 mb-8">{{ $landing->header_subtitle ?? $landing->subtitle }}</p>
+                <a href="{{ $landing->header_cta_url ?? route('form') }}" class="btn-primary">
+                    {{ $landing->header_cta_text }}
+                </a>
             </div>
         </section>
 
@@ -107,8 +111,36 @@
                         {!! $landing->content !!}
                     </div>
 
+                    <!-- Sections additionnelles -->
+                    @if($landing->section1_title)
+                    <div class="mt-10">
+                        <h2 class="text-2xl font-bold mb-4">{{ $landing->section1_title }}</h2>
+                        <div class="prose max-w-none">
+                            {!! $landing->section1_content !!}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($landing->section2_title)
+                    <div class="mt-10">
+                        <h2 class="text-2xl font-bold mb-4">{{ $landing->section2_title }}</h2>
+                        <div class="prose max-w-none">
+                            {!! $landing->section2_content !!}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($landing->section3_title)
+                    <div class="mt-10">
+                        <h2 class="text-2xl font-bold mb-4">{{ $landing->section3_title }}</h2>
+                        <div class="prose max-w-none">
+                            {!! $landing->section3_content !!}
+                        </div>
+                    </div>
+                    @endif
+
                     @if($landing->advantages_title)
-                    <div class="mt-8">
+                    <div class="mt-10">
                         <h3 class="text-xl font-semibold mb-4">{{ $landing->advantages_title }}</h3>
                         <div class="prose max-w-none">
                             {!! $landing->advantages_list !!}
@@ -116,8 +148,33 @@
                     </div>
                     @endif
 
-                    <div class="mt-10 text-center">
-                        <a href="{{ route('home') }}" class="btn-primary">
+                    <!-- Section témoignages -->
+                    @if($landing->testimonials && count((array)$landing->testimonials) > 0)
+                    <div class="mt-16">
+                        <h2 class="text-2xl font-bold mb-8 text-center">Témoignages clients</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            @foreach((array)$landing->testimonials as $name => $testimonial)
+                            <div class="bg-gray-50 p-6 rounded-lg shadow">
+                                <p class="italic mb-4">"{{ $testimonial }}"</p>
+                                <div class="font-semibold text-primary">{{ $name }}</div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Section FAQ -->
+                    @if($landing->faq_title && $landing->faq_content)
+                    <div class="mt-16">
+                        <h2 class="text-2xl font-bold mb-6 text-center">{{ $landing->faq_title }}</h2>
+                        <div class="prose max-w-none">
+                            {!! $landing->faq_content !!}
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="mt-12 text-center">
+                        <a href="{{ route('form') }}" class="btn-primary">
                             {{ $landing->cta_text }}
                         </a>
                     </div>
@@ -129,9 +186,24 @@
     <footer class="bg-gray-800 text-white py-8">
         <div class="container mx-auto px-4">
             <div class="text-center">
-                <p>&copy; {{ date('Y') }} - Panneau Solaire et Pompe à Chaleur</p>
+                <p>{{ $landing->footer_text }}</p>
+
+                @if($landing->footer_links && count((array)$landing->footer_links) > 0)
+                <div class="mt-4 flex justify-center gap-4">
+                    @foreach((array)$landing->footer_links as $text => $url)
+                    <a href="{{ $url }}" class="text-gray-300 hover:text-white">{{ $text }}</a>
+                    @endforeach
+                </div>
+                @endif
             </div>
         </div>
     </footer>
+
+    <!-- JavaScript personnalisé -->
+    @if($landing->custom_js)
+    <script>
+        {!! $landing->custom_js !!}
+    </script>
+    @endif
 </body>
 </html>

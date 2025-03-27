@@ -25,16 +25,11 @@ class LandingPageController extends Controller
     /**
      * Affiche la landing page par défaut (première active).
      *
-     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\View\View
      */
     public function default()
     {
-        $landing = LandingPage::where('is_active', true)->first();
-
-        if (!$landing) {
-            return redirect()->route('home')->with('error', 'Aucune landing page disponible.');
-        }
-
+        $landing = LandingPage::getDefault();
         return view('landing-page', compact('landing'));
     }
 }

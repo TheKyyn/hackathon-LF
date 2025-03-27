@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class DuplicateLandingPage extends Action
@@ -23,11 +24,21 @@ class DuplicateLandingPage extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
+        $duplicatedLandings = [];
+
         foreach ($models as $model) {
             $clone = $model->duplicate();
+
+            // Si un titre personnalisé est fourni, l'utiliser
+            if (!empty($fields->new_title)) {
+                $clone->title = $fields->new_title;
+                $clone->save();
+            }
+
+            $duplicatedLandings[] = $clone;
         }
 
-        return ActionResponse::message('La landing page a été dupliquée avec succès.');
+        return ActionResponse::message('La landing page a été dupliquée avec succès sous le titre : ' . $duplicatedLandings[0]->title);
     }
 
     /**
@@ -35,7 +46,7 @@ class DuplicateLandingPage extends Action
      */
     public function name(): string
     {
-        return __('Dupliquer');
+        return __('Dupliquer la landing page');
     }
 
     /**
@@ -54,6 +65,10 @@ class DuplicateLandingPage extends Action
      */
     public function fields(NovaRequest $request): array
     {
-        return [];
+        return [
+            Text::make('Nouveau titre', 'new_title')
+                ->help('Si laissé vide, le titre sera "[Titre original] (copie)"')
+                ->nullable(),
+        ];
     }
 }

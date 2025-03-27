@@ -38,8 +38,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 // Routes pour les landing pages
-Route::get('/landing/{slug}', [LandingPageController::class, 'show'])->name('landing.show');
-Route::get('/landing', [LandingPageController::class, 'default'])->name('landing.default');
+Route::get('/landing/{slug}', function ($slug) {
+    $landing = \App\Models\LandingPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+    // Inclure les métadonnées
+    $meta = [
+        'title' => $landing->getValueOrDefault('title', 'Landing Page'),
+        'description' => $landing->getValueOrDefault('meta_description', ''),
+        'keywords' => $landing->getValueOrDefault('meta_keywords', ''),
+        'og_title' => $landing->getValueOrDefault('og_title', $landing->getValueOrDefault('title', 'Landing Page')),
+        'og_description' => $landing->getValueOrDefault('og_description', ''),
+        'og_image' => $landing->isCustomized('og_image') ? asset('storage/' . $landing->og_image) : '',
+    ];
+    return view('landing', ['landing' => $landing, 'meta' => $meta]);
+})->name('landing.show');
+
+// Route pour la landing page par défaut
+Route::get('/landing', function () {
+    $landing = \App\Models\LandingPage::getDefault();
+    // Inclure les métadonnées
+    $meta = [
+        'title' => $landing->getValueOrDefault('title', 'Landing Page'),
+        'description' => $landing->getValueOrDefault('meta_description', ''),
+        'keywords' => $landing->getValueOrDefault('meta_keywords', ''),
+        'og_title' => $landing->getValueOrDefault('og_title', $landing->getValueOrDefault('title', 'Landing Page')),
+        'og_description' => $landing->getValueOrDefault('og_description', ''),
+        'og_image' => $landing->isCustomized('og_image') ? asset('storage/' . $landing->og_image) : '',
+    ];
+    return view('landing', ['landing' => $landing, 'meta' => $meta]);
+})->name('landing.default');
 
 // Routes de test
 Route::get('/test-calendly', function () {
@@ -54,3 +80,19 @@ Route::get('/test-calendly-webhook', [TestController::class, 'testCalendlyWebhoo
 Route::get('/test-email', [TestController::class, 'testEmailSending'])->name('test.email');
 Route::get('/test-email-config', [TestController::class, 'showEmailConfig'])->name('test.email.config');
 Route::get('/test-native-mail', [TestController::class, 'testNativeMail'])->name('test.native.mail');
+
+// Routes de test pour les champs virtuels dans LandingPage
+Route::get('/test-landing-virtual-fields', function() {
+    // Tester un champ virtuel
+    $result1 = \App\Models\LandingPage::testVirtualField('guarantee3_title', 'Test Garantie 3');
+    $result2 = \App\Models\LandingPage::testVirtualField('primary_color', '#FF0000');
+
+    // Tester la création complète
+    $result3 = \App\Models\LandingPage::testCreateWithVirtualFields();
+
+    return [
+        'virtual_field_test' => $result1,
+        'regular_field_test' => $result2,
+        'create_test' => $result3,
+    ];
+})->middleware(['auth'])->name('test-landing-virtual-fields');
