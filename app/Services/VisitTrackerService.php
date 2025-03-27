@@ -30,33 +30,50 @@ class VisitTrackerService
      */
     public function trackVisit(Request $request): Visit
     {
-        // On récupère ou génère un token unique pour la visite
-        $cookieToken = $this->getOrCreateCookieToken($request);
+        try {
+            // Obtenir le token du cookie
+            $cookieToken = $this->getOrCreateCookieToken($request);
 
-        // Détection du navigateur et de l'appareil
-        $agent = new Agent();
-        $agent->setUserAgent($request->userAgent());
+            // Détection du navigateur et appareil
+            $agent = new Agent();
+            $agent->setUserAgent($request->userAgent());
 
-        // Création de la visite
-        $visit = Visit::create([
-            'cookie_token' => $cookieToken,
-            'landing_page' => $request->fullUrl(),
-            'referrer_url' => $request->header('referer'),
-            'utm_source' => $request->query('utm_source'),
-            'utm_medium' => $request->query('utm_medium'),
-            'utm_campaign' => $request->query('utm_campaign'),
-            'utm_term' => $request->query('utm_term'),
-            'utm_content' => $request->query('utm_content'),
-            'device_type' => $this->getDeviceType($agent),
-            'browser' => $agent->browser(),
-            'browser_version' => $agent->version($agent->browser()),
-            'os' => $agent->platform(),
-            'ip_address' => $request->ip(),
-        ]);
+            // Créer l'enregistrement avec toutes les données disponibles
+            $visit = Visit::create([
+                'cookie_token' => $cookieToken,
+                'landing_page' => $request->fullUrl(),
+                'referrer_url' => $request->header('referer'),
+                'utm_source' => $request->query('utm_source'),
+                'utm_medium' => $request->query('utm_medium'),
+                'utm_campaign' => $request->query('utm_campaign'),
+                'utm_term' => $request->query('utm_term'),
+                'utm_content' => $request->query('utm_content'),
+                'device_type' => $this->getDeviceType($agent),
+                'browser' => $agent->browser(),
+                'browser_version' => $agent->version($agent->browser()),
+                'os' => $agent->platform(),
+                'ip_address' => $request->ip(), // Assurez-vous que cette ligne fonctionne
+            ]);
 
-        Log::info('Nouvelle visite enregistrée', ['visit_id' => $visit->id, 'cookie' => $cookieToken]);
+            Log::info('Visite enregistrée', [
+                'id' => $visit->id,
+                'ip' => $visit->ip_address,
+                'page' => $visit->landing_page
+            ]);
 
-        return $visit;
+            return $visit;
+        } catch (\Exception $e) {
+            Log::error('Erreur lors du tracking de la visite', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Créer une visite minimale en cas d'erreur
+            return Visit::create([
+                'ip_address' => $request->ip(),
+                'landing_page' => $request->fullUrl()
+            ]);
+        }
     }
 
     /**
@@ -68,42 +85,55 @@ class VisitTrackerService
      */
     public function associateVisitToLead(Lead $lead, Request $request): void
     {
-        $cookieToken = $request->cookie(self::COOKIE_NAME);
+        try {
+            $cookieToken = $request->cookie(self::COOKIE_NAME);
 
-        if (!$cookieToken) {
-            Log::warning('Tentative d\'association sans cookie de visite', ['lead_id' => $lead->id]);
-            return;
-        }
-
-        // Recherche de la dernière visite avec ce cookie
-        $visit = Visit::where('cookie_token', $cookieToken)
-            ->where('is_converted', false)
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        if ($visit) {
-            $visit->convertToLead($lead);
-            Log::info('Visite convertie en lead', ['visit_id' => $visit->id, 'lead_id' => $lead->id]);
-
-            // Copie des UTM sur le lead pour rétrocompatibilité
-            if (!$lead->utm_source && $visit->utm_source) {
-                $lead->utm_source = $visit->utm_source;
+            if (!$cookieToken) {
+                // Si pas de cookie, essayer avec l'adresse IP
+                $visit = Visit::where('ip_address', $request->ip())
+                             ->where('is_converted', false)
+                             ->orderBy('created_at', 'desc')
+                             ->first();
+            } else {
+                // Recherche par cookie
+                $visit = Visit::where('cookie_token', $cookieToken)
+                             ->where('is_converted', false)
+                             ->orderBy('created_at', 'desc')
+                             ->first();
             }
 
-            if (!$lead->utm_medium && $visit->utm_medium) {
-                $lead->utm_medium = $visit->utm_medium;
-            }
+            if ($visit) {
+                $visit->convertToLead($lead);
+                Log::info('Visite convertie en lead', [
+                    'visit_id' => $visit->id,
+                    'lead_id' => $lead->id
+                ]);
 
-            if (!$lead->utm_campaign && $visit->utm_campaign) {
-                $lead->utm_campaign = $visit->utm_campaign;
+                // Mise à jour des UTM sur le lead
+                $this->updateLeadUtm($lead, $visit);
             }
-
-            $lead->save();
-        } else {
-            Log::warning('Aucune visite non convertie trouvée pour ce cookie', [
-                'cookie' => $cookieToken,
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de l\'association visite-lead', [
+                'message' => $e->getMessage(),
                 'lead_id' => $lead->id
             ]);
+        }
+    }
+
+    private function updateLeadUtm(Lead $lead, Visit $visit): void
+    {
+        $utmFields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+        $updated = false;
+
+        foreach ($utmFields as $field) {
+            if (empty($lead->$field) && !empty($visit->$field)) {
+                $lead->$field = $visit->$field;
+                $updated = true;
+            }
+        }
+
+        if ($updated) {
+            $lead->save();
         }
     }
 

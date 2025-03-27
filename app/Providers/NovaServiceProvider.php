@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Fortify\Features;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use App\Nova\Dashboards\VisitsDashboard;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -17,7 +18,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         parent::boot();
 
-        //
+        Nova::dashboards([
+            new \App\Nova\Dashboards\Main,
+            new VisitsDashboard,
+        ]);
     }
 
     /**

@@ -133,7 +133,11 @@ class Visit extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new \App\Nova\Filters\VisitDateFilter,
+            new \App\Nova\Filters\UtmSourceFilter,
+            new \App\Nova\Filters\DeviceTypeFilter,
+        ];
     }
 
     /**
