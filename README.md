@@ -1,67 +1,174 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Lead Factory (LF) - Collecte de Leads
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-12.x-red" alt="Laravel Version">
+  <img src="https://img.shields.io/badge/PHP-8.4-blue" alt="PHP Version">
+  <img src="https://img.shields.io/badge/TALL%20Stack-1.0-purple" alt="TALL Stack">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
-## About Laravel
+## 📋 À propos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Lead Factory est une plateforme web dédiée à la collecte de leads dans le domaine des énergies renouvelables (panneaux photovoltaïques et pompes à chaleur). Développée avec la stack TALL (Tailwind CSS, Alpine.js, Laravel, Livewire), elle propose un formulaire multi-étapes intuitif et des intégrations avec divers services externes.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Cette plateforme s'intègre avec la [Plateforme Centrale](https://github.com/TheKyyn/hackathon-platform-centrale) pour la synchronisation et le suivi des leads.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Fonctionnalités
 
-## Learning Laravel
+-   **Formulaire Multi-étapes**
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    -   Interface utilisateur intuitive et responsive
+    -   Validation en temps réel des données
+    -   Progression visuelle entre les étapes
+    -   Adaptation intelligente des questions suivantes
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+-   **Intégrations**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    -   Calendly pour la prise de rendez-vous
+    -   Twilio pour l'envoi de SMS de confirmation
+    -   Email personnalisé avec Mailtrap
+    -   Synchronisation avec la Plateforme Centrale
 
-## Laravel Sponsors
+-   **Administration**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+    -   Tableau de bord avec statistiques
+    -   Gestion des leads
+    -   Suivi des conversions
+    -   Visualisation des métriques
 
-### Premium Partners
+-   **Traçage des Visiteurs**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+    -   Suivi du parcours utilisateur
+    -   Analyse des sources de trafic
+    -   Identification des points d'abandon
 
-## Contributing
+-   **Synchronisation avec la Plateforme Centrale**
+    -   Envoi automatique des leads
+    -   Webhooks pour les mises à jour
+    -   API sécurisée par token
+    -   File d'attente pour garantir la fiabilité
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Installation
 
-## Code of Conduct
+### Prérequis
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+-   PHP 8.4+
+-   Composer
+-   MySQL ou SQLite
+-   Node.js & NPM
 
-## Security Vulnerabilities
+### Étapes d'installation
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Cloner le dépôt**
 
-## License
+    ```bash
+    git clone https://github.com/TheKyyn/hackathon-LF.git
+    cd hackathon-LF
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# hackathon-LF
+2. **Installer les dépendances**
+
+    ```bash
+    composer install
+    npm install
+    ```
+
+3. **Configurer l'environnement**
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+4. **Configurer la base de données**
+   Modifiez le fichier `.env` avec vos informations de connexion à la base de données.
+
+5. **Configurer les services externes**
+   Dans le fichier `.env`, ajoutez les informations pour :
+
+    - Twilio (SMS)
+    - Calendly
+    - Mailtrap (email)
+    - Plateforme Centrale (URL et token API)
+
+6. **Migrer la base de données**
+
+    ```bash
+    php artisan migrate
+    ```
+
+7. **Compiler les assets**
+
+    ```bash
+    npm run dev
+    ```
+
+8. **Démarrer le serveur**
+    ```bash
+    php artisan serve
+    ```
+
+## 🔄 Synchronisation avec la Plateforme Centrale
+
+La synchronisation avec la Plateforme Centrale est une fonctionnalité clé :
+
+1. **Configuration**
+
+    - Définissez l'URL et le token API dans `.env`
+
+    ```
+    CENTRAL_PLATFORM_URL=http://localhost:8000
+    CENTRAL_PLATFORM_API_TOKEN=your_api_token_here
+    ```
+
+2. **Synchronisation Manuelle**
+
+    ```bash
+    php artisan leads:sync
+    ```
+
+3. **Synchronisation Automatique**
+
+    - La tâche planifiée s'exécute toutes les 10 minutes
+    - Les nouveaux leads sont envoyés automatiquement
+    - Les échecs sont réessayés via une file d'attente
+
+4. **Tests**
+   Les tests automatisés garantissent le bon fonctionnement de la synchronisation :
+    ```bash
+    php artisan test --filter=LeadSynchronizationTest
+    ```
+
+## 📊 Administration
+
+Le tableau de bord d'administration offre :
+
+-   Vue d'ensemble des leads collectés
+-   Statistiques de conversion
+-   Analyse des sources de trafic
+-   Reporting des performances des campagnes
+
+## 📱 Versions Mobiles et Tablettes
+
+Le design responsive s'adapte parfaitement aux appareils mobiles et tablettes, offrant une expérience utilisateur optimale sur tous les écrans.
+
+## 🔧 Personnalisation
+
+La plateforme peut être personnalisée selon vos besoins :
+
+-   Ajout de nouvelles étapes au formulaire
+-   Modification des questions
+-   Intégration de services supplémentaires
+-   Personnalisation du design via Tailwind CSS
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## ✏️ Auteurs
+
+-   **TheKyyn** - [GitHub](https://github.com/TheKyyn)
+
+---
+
+<p align="center">Développé avec ❤️ pour le Hackathon 2025</p>
