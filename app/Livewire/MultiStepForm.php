@@ -268,27 +268,37 @@ class MultiStepForm extends Component
         $this->utm_medium = request()->get('utm_medium', null);
         $this->utm_campaign = request()->get('utm_campaign', null);
 
+        // Récupérer le paramètre cost de l'URL si présent
+        if (request()->has('cost')) {
+            $costValue = request()->get('cost');
+            $this->cost = (int)$costValue; // Conversion en entier pour s'assurer que c'est bien un nombre
+
+            // On pourrait aussi stocker ça en session pour le garder disponible
+            session()->put('selected_cost', $this->cost);
+        }
+
         // Récupérer le paramètre cost de l'URL et définir la réponse correspondante
         if (request()->has('cost')) {
             $costOption = request()->get('cost');
 
             switch ($costOption) {
                 case 1:
-                    $this->energy_bill = '0-50';
+                    $this->energy_bill = 'less_100';
                     break;
                 case 2:
-                    $this->energy_bill = '50-100';
+                    $this->energy_bill = '100_200';
                     break;
                 case 3:
-                    $this->energy_bill = '100-150';
+                    $this->energy_bill = '200_300';
                     break;
                 case 4:
-                    $this->energy_bill = '150+';
+                    $this->energy_bill = 'more_300';
                     break;
             }
 
-            // Optionnellement, passer automatiquement à l'étape suivante
-            // $this->nextStep();
+            // Passer automatiquement à l'étape suivante pour montrer à l'utilisateur
+            // que sa sélection a bien été prise en compte
+            $this->step = 2;
         }
 
         // Pour les besoins du hackathon, définir isEligible à true par défaut
@@ -885,5 +895,18 @@ class MultiStepForm extends Component
     {
         // Appelle nextStep lorsque l'utilisateur appuie sur Entrée
         $this->nextStep();
+    }
+
+    /**
+     * Rendu de l'étape des coûts
+     */
+    public function renderCostStep()
+    {
+        // Si $this->cost est déjà défini (depuis l'URL), on l'utilise directement
+        // Sinon, on vérifie la session ou on utilise une valeur par défaut
+
+        return view('livewire.steps.cost-step', [
+            'preSelectedCost' => $this->cost ?? session('selected_cost', null)
+        ]);
     }
 }

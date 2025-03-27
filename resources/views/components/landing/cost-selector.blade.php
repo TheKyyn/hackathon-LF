@@ -8,28 +8,28 @@
             <div class="w-full flex flex-wrap md:flex-nowrap gap-4">
                 <a href="{{ route('form', ['cost' => 1]) }}" class="flex-1 p-[30px] bg-[#013565]/5 rounded-md outline outline-1 outline-offset-[-1px] outline-[#013565] flex justify-center items-center gap-2.5 hover:bg-[#013565]/10 transition-colors">
                     <div class="text-center">
-                        <span class="text-[#013565] text-xl font-bold font-marianne">0 - 50€ </span>
+                        <span class="text-[#013565] text-xl font-bold font-marianne">0 - 100€ </span>
                         <span class="text-[#013565] text-sm font-normal font-marianne">/mois</span>
                     </div>
                 </a>
 
                 <a href="{{ route('form', ['cost' => 2]) }}" class="flex-1 p-[30px] bg-[#013565]/5 rounded-md outline outline-1 outline-offset-[-1px] outline-[#013565] flex justify-center items-center gap-2.5 hover:bg-[#013565]/10 transition-colors">
                     <div class="text-center">
-                        <span class="text-[#013565] text-xl font-bold font-marianne">50 - 100€ </span>
+                        <span class="text-[#013565] text-xl font-bold font-marianne">100 - 200€ </span>
                         <span class="text-[#013565] text-sm font-normal font-marianne">/mois</span>
                     </div>
                 </a>
 
                 <a href="{{ route('form', ['cost' => 3]) }}" class="flex-1 p-[30px] bg-[#013565]/5 rounded-md outline outline-1 outline-offset-[-1px] outline-[#013565] flex justify-center items-center gap-2.5 hover:bg-[#013565]/10 transition-colors">
                     <div class="text-center">
-                        <span class="text-[#013565] text-xl font-bold font-marianne">100 - 150€ </span>
+                        <span class="text-[#013565] text-xl font-bold font-marianne">200 - 300€ </span>
                         <span class="text-[#013565] text-sm font-normal font-marianne">/mois</span>
                     </div>
                 </a>
 
                 <a href="{{ route('form', ['cost' => 4]) }}" class="flex-1 p-[30px] bg-[#013565]/5 rounded-md outline outline-1 outline-offset-[-1px] outline-[#013565] flex justify-center items-center gap-2.5 hover:bg-[#013565]/10 transition-colors">
                     <div class="text-center">
-                        <span class="text-[#013565] text-xl font-bold font-marianne">+150€ </span>
+                        <span class="text-[#013565] text-xl font-bold font-marianne">300€ et + </span>
                         <span class="text-[#013565] text-sm font-normal font-marianne">/mois</span>
                     </div>
                 </a>
